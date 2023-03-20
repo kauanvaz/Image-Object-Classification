@@ -3,7 +3,7 @@ import numpy as np
 
 def draw_label(img, x, y, w, h, color, label):
     cv.rectangle(img, (x,y), (x+w,y+h), color, 2)
-    cv.putText(img, label, (x,y-10), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+    cv.putText(img, label, (x+10,y+15), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
 # Load the image in grayscale
 image = cv.imread('images/gears.jpg')
@@ -48,15 +48,17 @@ for i, cnt in enumerate(contours):
             indexes_borders.append(i)
             draw_label(output_img, x, y, w, h, (255, 0, 0), "Undefined")
 
+list_contours = list(contours)
 for index in sorted(indexes_borders, reverse=True):
-    del contours[index]
+    del list_contours[index]
+new_contours = tuple(list_contours)
 
 for index in sorted(indexes_borders, reverse=True):
     del areas[index]
 
 areas.sort()
 
-for i, cnt in enumerate(contours):
+for i, cnt in enumerate(new_contours):
     x,y,w,h = cv.boundingRect(cnt)
     ratio = round(cv.contourArea(cnt)/areas[-1], 2)
     # Check if the object is defective

@@ -25,16 +25,27 @@ if hist[-1] > hist[0]:
 _, thr_img = cv.threshold(img_for_thres, 0, 255, cv.THRESH_BINARY+cv.THRESH_OTSU)
 contours, hierarchy = cv.findContours(thr_img, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
+areas = []
+for cnt in contours:
+    areas.append(cv.contourArea(cnt))
+
 categories = {"Good":0, "Defective":0, "Undefined":0}
 output_img = image.copy()
+indexes_borders = []
 
-for cnt in contours:
+for i, cnt in enumerate(contours):
     x,y,w,h = cv.boundingRect(cnt)
     # Check if the object is touching any edge
     if x == 0 or y == 0 or x+w == image.shape[1] or y+h == image.shape[0]:
         categories["Undefined"] += 1
-        draw_label(output_img, x, y, w, h, (0, 0, 255), "Undefined")
-    
+        indexes_borders.append(i)
+        draw_label(output_img, x, y, w, h, (255, 0, 0), "Undefined")
+    else:
+        if cv.contourArea(cnt)/sorted(areas)[0] >= 2:
+            categories["Undefined"] += 1
+            indexes_borders.append(i)
+            draw_label(output_img, x, y, w, h, (255, 0, 0), "Undefined")
+
 # Display image and counts
 print('Good: ', categories.get("Good"))
 print('Defective: ', categories.get("Defective"))

@@ -46,6 +46,27 @@ for i, cnt in enumerate(contours):
             indexes_borders.append(i)
             draw_label(output_img, x, y, w, h, (255, 0, 0), "Undefined")
 
+list_contours = list(contours)
+for index in sorted(indexes_borders, reverse=True):
+    del list_contours[index]
+new_contours = tuple(list_contours)
+
+for index in sorted(indexes_borders, reverse=True):
+    del areas[index]
+
+areas.sort()
+
+for i, cnt in enumerate(new_contours):
+    x,y,w,h = cv.boundingRect(cnt)
+    ratio = round(cv.contourArea(cnt)/areas[-1], 2)
+    # Check if the object is defective
+    if ratio < 1.00:
+        categories["Defective"] += 1
+        draw_label(output_img, x, y, w, h, (0, 0, 255), "Defective")
+    else:
+        categories["Good"] += 1
+        draw_label(output_img, x, y, w, h, (0, 255, 0), "Good")
+
 # Display image and counts
 print('Good: ', categories.get("Good"))
 print('Defective: ', categories.get("Defective"))

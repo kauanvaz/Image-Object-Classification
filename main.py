@@ -1,5 +1,6 @@
 import cv2 as cv
 
+# Draw rectangles and text over specified coordinates
 def draw_label(img, x, y, w, h, color, label):
     cv.rectangle(img, (x,y), (x+w,y+h), color, 2)
     cv.putText(img, label, (x+10,y+15), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
@@ -25,6 +26,7 @@ if hist[-1] > hist[0]:
 _, thr_img = cv.threshold(img_for_thres, 0, 255, cv.THRESH_BINARY+cv.THRESH_OTSU)
 contours, hierarchy = cv.findContours(thr_img, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
 
+# Store each area of contours
 areas = []
 for cnt in contours:
     areas.append(cv.contourArea(cnt))
@@ -41,11 +43,13 @@ for i, cnt in enumerate(contours):
         indexes_borders.append(i)
         draw_label(output_img, x, y, w, h, (255, 0, 0), "Undefined")
     else:
+        # Check if the object is at least 2 times bigger than the others
         if cv.contourArea(cnt)/sorted(areas)[0] >= 2:
             categories["Undefined"] += 1
             indexes_borders.append(i)
             draw_label(output_img, x, y, w, h, (255, 0, 0), "Undefined")
 
+# Remove contours and areas of objects that were already identified
 list_contours = list(contours)
 for index in sorted(indexes_borders, reverse=True):
     del list_contours[index]
@@ -72,6 +76,6 @@ print('Good: ', categories.get("Good"))
 print('Defective: ', categories.get("Defective"))
 print('Undefined: ', categories.get("Undefined"))
 
-cv.imshow("Object Labels", output_img)
+cv.imshow("Labeled objetcs", output_img)
 cv.waitKey(0)
 cv.destroyAllWindows()

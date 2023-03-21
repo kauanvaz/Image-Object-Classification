@@ -1,9 +1,8 @@
 import cv2 as cv
-import numpy as np
 
 def draw_label(img, x, y, w, h, color, label):
     cv.rectangle(img, (x,y), (x+w,y+h), color, 2)
-    cv.putText(img, label, (x,y-10), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+    cv.putText(img, label, (x+10,y+15), cv.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
 # Load the image in grayscale
 image = cv.imread('images/gears.jpg')
@@ -12,20 +11,19 @@ gray = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
 # Filter the image with a 5x5 gaussian kernel to remove possible noise
 blurred = cv.GaussianBlur(gray, (5, 5), 0)
 
-# Invert the colors of the image (detect white objects in a black background)
-inverted_img = cv.bitwise_not(blurred)
+# Generate the image's histogram
+hist = cv.calcHist([blurred], [0], None, [256], [0, 256])
+
+# If there are more white pixels than black pixels, it means the background is white and objects are black, so colors are inverted
+# because the findContours function assumes that objects in the image are lighter than the background by default
+img_for_thres = blurred
+if hist[-1] > hist[0]:
+    # Invert the colors of the image (detect white objects in a black background)
+    img_for_thres = cv.bitwise_not(blurred)
 
 # Apply Otsu's threshold method (automatically determines the threshold value)
-_, thr_img = cv.threshold(inverted_img, 0, 255, cv.THRESH_BINARY+cv.THRESH_OTSU)
+_, thr_img = cv.threshold(img_for_thres, 0, 255, cv.THRESH_BINARY+cv.THRESH_OTSU)
 contours, hierarchy = cv.findContours(thr_img, cv.RETR_EXTERNAL, cv.CHAIN_APPROX_SIMPLE)
-
-"""
-cv.drawContours(image, contours, -1, (0, 0, 255), 2)
-
-cv.imshow('Contours', image)
-cv.waitKey(0)
-cv.destroyAllWindows()
-"""
 
 categories = {"Good":0, "Defective":0, "Undefined":0}
 output_img = image.copy()

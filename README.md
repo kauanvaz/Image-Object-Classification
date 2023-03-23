@@ -1,2 +1,2 @@
 # Image-Object-Classification
-This repository contains a Python implementation of an object classification system using digital image processing techniques. The system can detect and classify objects based on their location, orientation, and size, while ignoring any undefined or defective objects.
+This repository contains a Python implementation of an object classification system using digital image processing techniques. The system can detect, count and classify objects as Good, Defective or Undefined based on their location and size.
